@@ -5,18 +5,18 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch: # Allows you to manually trigger the build
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # Pinning to 24.04 temporarily ensures tool consistency
 
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v4.2.2 # Fixed Node.js warning
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5 # Fixed setup-java v4 deprecation
       with:
         java-version: '17'
         distribution: 'temurin'
@@ -26,7 +26,8 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build Debug APK
-      run: ./gradlew assembleDebug
+      # Added --stacktrace to reveal the exact Android/Gradle compilation failure
+      run: ./gradlew assembleDebug --stacktrace 
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
