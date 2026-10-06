@@ -9,24 +9,30 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04 # Pinning to 24.04 temporarily ensures tool consistency
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v4.2.2 # Fixed Node.js warning
+      uses: actions/checkout@v4.2.2
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v5 # Fixed setup-java v4 deprecation
+      uses: actions/setup-java@v5
       with:
         java-version: '17'
         distribution: 'temurin'
         cache: gradle
 
+    - name: Strip Local Windows Paths
+      # Removes the invalid Windows path from gradle.properties so it uses GitHub's Java path instead
+      run: |
+        if [ -f gradle.properties ]; then
+          sed -i '/org.gradle.java.home/d' gradle.properties
+        fi
+
     - name: Grant Execute Permission for Gradlew
       run: chmod +x gradlew
 
     - name: Build Debug APK
-      # Added --stacktrace to reveal the exact Android/Gradle compilation failure
       run: ./gradlew assembleDebug --stacktrace 
 
     - name: Upload APK Artifact
